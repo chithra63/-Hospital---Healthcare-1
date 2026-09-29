@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSphere AI | Healthcare Assistant</title>
+    <style>
+        :root {
+            --bg: #07131b;
+            --panel: rgba(11, 30, 40, 0.88);
+            --panel-2: rgba(17, 42, 54, 0.72);
+            --line: rgba(158, 224, 229, 0.16);
+            --text: #eefbfc;
+            --muted: #8eafb7;
+            --accent: #63e6d4;
+            --accent-2: #74a9ff;
+            --user: #153e4c;
+            --bot: #102934;
+            --danger: #ff9c9c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(99, 230, 212, .13), transparent 28%),
+                radial-gradient(circle at 90% 85%, rgba(116, 169, 255, .14), transparent 30%),
+                var(--bg);
+            overflow: hidden;
+        }
+
+        .shell {
+            width: min(1180px, 94vw);
+            height: min(900px, 94vh);
+            margin: 3vh auto;
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            overflow: hidden;
+            background: var(--panel);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .42);
+            backdrop-filter: blur(24px);
+        }
+
+        aside {
+            padding: 28px 20px;
+            border-right: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(99,230,212,.07), transparent 55%);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 34px;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            color: #061316;
+            background: linear-gradient(135deg, var(--accent), #a6f5e9);
+            font-size: 22px;
+            font-weight: 900;
+            box-shadow: 0 10px 30px rgba(99,230,212,.2);
+        }
+
+        .brand strong { display: block; font-size: 15px; }
+        .brand span { color: var(--muted); font-size: 11px; }
+
+        .side-card {
+            padding: 18px;
+            margin-bottom: 14px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .side-card h3 {
+            margin: 0 0 8px;
+            font-size: 13px;
+        }
+
+        .side-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            color: #a9c6cc;
+            font-size: 11px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--accent);
+        }
+
+        main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: -.02em;
+        }
+
+        header p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .badge {
+            padding: 8px 11px;
+            border: 1px solid rgba(99,230,212,.2);
+            border-radius: 999px;
+            color: var(--accent);
+            background: rgba(99,230,212,.06);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            scroll-behavior: smooth;
+        }
+
+        .welcome {
+            max-width: 680px;
+            margin: 5vh auto;
+            text-align: center;
+        }
+
+        .pulse {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 20px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(99,230,212,.25);
+            border-radius: 20px;
+            color: var(--accent);
+            background: rgba(99,230,212,.07);
+            font-size: 27px;
+        }
+
+        .welcome h2 {
+            margin: 0 0 10px;
+            font-size: 29px;
+            letter-spacing: -.04em;
+        }
+
+        .welcome p {
+            margin: 0 auto 24px;
+            max-width: 540px;
+            color: var(--muted);
+            line-height: 1.65;
+            font-size: 13px;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 9px;
+        }
+
+        .suggestion {
+            padding: 10px 13px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: #bdd2d6;
+            background: rgba(255,255,255,.025);
+            cursor: pointer;
+            font-size: 11px;
+            transition: .2s ease;
+        }
+
+        .suggestion:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99,230,212,.35);
+            color: var(--accent);
+        }
+
+        .message {
+            display: flex;
+            gap: 11px;
+            max-width: 780px;
+            margin: 0 auto 18px;
+            animation: rise .22s ease;
+        }
+
+        .message.user { justify-content: flex-end; }
+        .message.user .avatar { order: 2; }
+
+        .avatar {
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            color: #061316;
+            background: var(--accent);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .user .avatar {
+            color: white;
+            background: var(--accent-2);
+        }
+
+        .bubble {
+            max-width: min(680px, 78%);
+            padding: 12px 15px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: var(--bot);
+            color: #dcecef;
+            font-size: 13px;
+            line-height: 1.65;
+            white-space: pre-wrap;
+        }
+
+        .user .bubble {
+            background: var(--user);
+            border-color: rgba(116,169,255,.18);
+        }
+
+        .error .bubble { color: var(--danger); }
+
+        .composer {
+            padding: 18px 24px 22px;
+            border-top: 1px solid var(--line);
+            background: rgba(4, 16, 23, .42);
+        }
+
+        form {
+            max-width: 780px;
+            margin: auto;
+            display: flex;
+            gap: 10px;
+            padding: 7px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: rgba(255,255,255,.035);
+        }
+
+        textarea {
+            flex: 1;
+            min-height: 42px;
+            max-height: 130px;
+            padding: 11px 12px;
+            border: 0;
+            outline: 0;
+            resize: none;
+            color: var(--text);
+            background: transparent;
+            font: inherit;
+            font-size: 13px;
+        }
+
+        textarea::placeholder { color: #68848c; }
+
+        button {
+            align-self: flex-end;
+            width: 42px;
+            height: 42px;
+            border: 0;
+            border-radius: 13px;
+            color: #061316;
+            background: var(--accent);
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 900;
+            transition: .2s ease;
+        }
+
+        button:hover { transform: translateY(-1px); filter: brightness(1.06); }
+        button:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        .notice {
+            max-width: 780px;
+            margin: 8px auto 0;
+            color: #5f7b83;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        .typing {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing i {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: blink 1s infinite;
+        }
+
+        .typing i:nth-child(2) { animation-delay: .15s; }
+        .typing i:nth-child(3) { animation-delay: .3s; }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: .25; transform: scale(.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 760px) {
+            body { overflow: auto; }
+            .shell {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                grid-template-columns: 1fr;
+            }
+            aside { display: none; }
+            header { padding: 18px; }
+            #messages { padding: 20px 14px; }
+            .composer { padding: 12px 10px 16px; }
+            .bubble { max-width: 86%; }
+            .welcome h2 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <aside>
+            <div class="brand">
+                <div class="brand-mark">+</div>
+                <div>
+                    <strong>CareSphere AI</strong>
+                    <span>Healthcare Learning Assistant</span>
+                </div>
+            </div>
+
+            <div class="side-card">
+                <h3>Focused Knowledge</h3>
+                <p>Built specifically for hospital and healthcare-related educational questions.</p>
+            </div>
+
+            <div class="side-card">
+                <h3>Study First</h3>
+                <p>Ask about medical terminology, nursing, anatomy, diagnostics, procedures, public health and more.</p>
+            </div>
+
+            <div class="status">
+                <span class="dot"></span>
+                <span>AI service ready</span>
+            </div>
+        </aside>
+
+        <main>
+            <header>
+                <div>
+                    <h1>Hospital & Healthcare Assistant</h1>
+                    <p>Learn healthcare concepts clearly and responsibly.</p>
+                </div>
+                <div class="badge">HEALTHCARE AI</div>
+            </header>
+
+            <section id="messages">
+                <div class="welcome" id="welcome">
+                    <div class="pulse">✚</div>
+                    <h2>What would you like to study?</h2>
+                    <p>
+                        Ask a healthcare or hospital-related question.
+                        This assistant is designed for educational use and does not replace professional medical care.
+                    </p>
+                    <div class="suggestions">
+                        <div class="suggestion">What is triage?</div>
+                        <div class="suggestion">Explain infection control</div>
+                        <div class="suggestion">What are vital signs?</div>
+                        <div class="suggestion">Explain patient admission</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="composer">
+                <form id="chat-form">
+                    <textarea id="message" rows="1" placeholder="Ask a healthcare study question..." autocomplete="off"></textarea>
+                    <button id="send" type="submit" aria-label="Send">↑</button>
+                </form>
+                <div class="notice">Educational information only • For emergencies, contact local emergency services.</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const form = document.getElementById("chat-form");
+        const input = document.getElementById("message");
+        const send = document.getElementById("send");
+        const messages = document.getElementById("messages");
+        const welcome = document.getElementById("welcome");
+
+        function addMessage(text, role, isError = false) {
+            if (welcome) welcome.remove();
+
+            const row = document.createElement("div");
+            row.className = `message ${role}${isError ? " error" : ""}`;
+
+            const avatar = document.createElement("div");
+            avatar.className = "avatar";
+            avatar.textContent = role === "user" ? "YOU" : "AI";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            bubble.textContent = text;
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            messages.appendChild(row);
+            messages.scrollTop = messages.scrollHeight;
+            return row;
+        }
+
+        function addTyping() {
+            if (welcome) welcome.remove();
+
+            const row = document.createElement("div");
+            row.className = "message";
+            row.id = "typing";
+
+            const avatar = document.createElement("div");
+            avatar.className = "avatar";
+            avatar.textContent = "AI";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+
+            const dots = document.createElement("span");
+            dots.className = "typing";
+            dots.innerHTML = "<i></i><i></i><i></i>";
+            bubble.appendChild(dots);
+
+            row.appendChild(avatar);
+            row.appendChild(bubble);
+            messages.appendChild(row);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        document.querySelectorAll(".suggestion").forEach(item => {
+            item.addEventListener("click", () => {
+                input.value = item.textContent;
+                input.focus();
+            });
+        });
+
+        input.addEventListener("input", () => {
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 130) + "px";
+        });
+
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                form.requestSubmit();
+            }
+        });
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+
+            const message = input.value.trim();
+            if (!message || send.disabled) return;
+
+            addMessage(message, "user");
+            input.value = "";
+            input.style.height = "auto";
+            send.disabled = true;
+            addTyping();
+
+            try {
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                document.getElementById("typing")?.remove();
+
+                if (!response.ok) {
+                    addMessage(data.error || "Unable to process your request.", "assistant", true);
+                } else {
+                    addMessage(data.answer, "assistant");
+                }
+            } catch (error) {
+                document.getElementById("typing")?.remove();
+                addMessage("Unable to connect to the AI service. Please try again.", "assistant", true);
+            } finally {
+                send.disabled = false;
+                input.focus();
+            }
+        });
+    </script>
+</body>
+</html>
